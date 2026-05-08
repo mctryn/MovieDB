@@ -1,0 +1,97 @@
+{
+  "page": 1,
+  "results": [
+    {
+      "id": 1,
+      "title": "Inception",
+      "overview": "Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets is offered a chance to regain his old life as payment for a task considered to be impossible: inception.",
+      "poster_path": "/inception.jpg",
+      "release_date": "2010-07-16",
+      "vote_average": 8.8,
+      "vote_count": 35000
+    },
+    {
+      "id": 2,
+      "title": "The Dark Knight",
+      "overview": "Batman raises the stakes in his war on crime. With the help of Lt. Jim Gordon and District Attorney Harvey Dent, Batman sets out to dismantle the remaining criminal organizations that plague the streets.",
+      "poster_path": "/dark_knight.jpg",
+      "release_date": "2008-07-18",
+      "vote_average": 9.0,
+      "vote_count": 30000
+    },
+    {
+      "id": 3,
+      "title": "Interstellar",
+      "overview": "The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage.",
+      "poster_path": "/interstellar.jpg",
+      "release_date": "2014-11-07",
+      "vote_average": 8.6,
+      "vote_count": 28000
+    },
+    {
+      "id": 4,
+      "title": "The Matrix",
+      "overview": "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
+      "poster_path": "/matrix.jpg",
+      "release_date": "1999-03-31",
+      "vote_average": 8.7,
+      "vote_count": 25000
+    },
+    {
+      "id": 5,
+      "title": "Forrest Gump",
+      "overview": "A man with a low IQ has accomplished great things in his life and been present during significant historic events.",
+      "poster_path": "/forrest_gump.jpg",
+      "release_date": "1994-07-06",
+      "vote_average": 8.8,
+      "vote_count": 24000
+    },
+    {
+      "id": 6,
+      "title": "Titanic",
+      "overview": "A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious and ill-fated R.M.S. Titanic.",
+      "poster_path": "/titanic.jpg",
+      "release_date": "1997-12-19",
+      "vote_average": 7.9,
+      "vote_count": 22000
+    },
+    {
+      "id": 7,
+      "title": "Avatar",
+      "overview": "A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.",
+      "poster_path": "/avatar.jpg",
+      "release_date": "2009-12-18",
+      "vote_average": 7.9,
+      "vote_count": 26000
+    },
+    {
+      "id": 8,
+      "title": "The Shawshank Redemption",
+      "overview": "Framed in the 1940s for the double murder of his wife and her lover, upstanding banker Andy Dufresne begins a new life at the Shawshank prison.",
+      "poster_path": "/shawshank.jpg",
+      "release_date": "1994-09-23",
+      "vote_average": 9.3,
+      "vote_count": 23000
+    },
+    {
+      "id": 9,
+      "title": "Pulp Fiction",
+      "overview": "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
+      "poster_path": "/pulp_fiction.jpg",
+      "release_date": "1994-10-14",
+      "vote_average": 8.9,
+      "vote_count": 21000
+    },
+    {
+      "id": 10,
+      "title": "The Lord of the Rings: The Return of the King",
+      "overview": "Gandalf and Aragorn lead the World of Men against Sauron's army to draw his gaze from Frodo and Sam as they approach Mount Doom with the One Ring.",
+      "poster_path": "/lotr.jpg",
+      "release_date": "2003-12-17",
+      "vote_average": 9.0,
+      "vote_count": 20000
+    }
+  ],
+  "total_pages": 1,
+  "total_results": 10
+}

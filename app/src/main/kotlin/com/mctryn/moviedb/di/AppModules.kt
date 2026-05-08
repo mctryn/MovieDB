@@ -1,7 +1,7 @@
 package com.mctryn.moviedb.di
 
 import org.koin.core.annotation.KoinExperimentalAPI
-import org.koin.dsl.module
+import org.koin.core.context.startKoin
 
 @OptIn(KoinExperimentalAPI::class)
 val appModules = listOf(
@@ -14,7 +14,7 @@ val appModules = listOf(
 )
 
 fun initKoin() {
-    org.koin.core.context.startKoin {
+    startKoin {
         modules(appModules)
     }
 }

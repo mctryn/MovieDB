@@ -84,9 +84,12 @@ dependencies {
 
     // Testing
     testImplementation(libs.junit)
+    testImplementation(libs.androidx.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.arch.core.testing)
+    testImplementation(libs.androidx.room.testing)
+    testImplementation(libs.okhttp.mockwebserver)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
