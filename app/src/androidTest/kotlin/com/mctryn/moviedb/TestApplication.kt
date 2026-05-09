@@ -1,12 +1,9 @@
 package com.mctryn.moviedb
 
 import android.app.Application
-import com.mctryn.moviedb.di.initKoin
 
-class MovieDbApplication : Application() {
+class TestApplication: Application() {
     override fun onCreate() {
         super.onCreate()
-        
-        initKoin()
     }
 }

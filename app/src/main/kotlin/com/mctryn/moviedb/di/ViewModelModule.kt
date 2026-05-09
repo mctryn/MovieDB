@@ -1,19 +1,14 @@
 package com.mctryn.moviedb.di
 
-import org.koin.androidx.viewmodel.dsl.viewModel
+import com.mctryn.moviedb.presentation.list.MovieListViewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 /**
- * ViewModel module for presentation layer dependencies.
+ * ViewModel module for dependency injection.
  * 
- * TODO: Phase 4-6 - Implement ViewModels
- * - MovieListViewModel
- * - MovieDetailsViewModel
- * - FavoritesViewModel
+ * Provides ViewModels for the presentation layer.
  */
 val viewModelModule = module {
-    // TODO: Add ViewModel providers
-    // viewModel { MovieListViewModel(get(), get(), get(), get(), get()) }
-    // viewModel { params -> MovieDetailsViewModel(...) }
-    // viewModel { FavoritesViewModel(get(), get(), get()) }
+    viewModelOf(::MovieListViewModel)
 }

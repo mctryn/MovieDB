@@ -1,0 +1,120 @@
+package com.mctryn.moviedb.presentation.list
+
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import com.mctryn.moviedb.di.MockRepository
+import com.mctryn.moviedb.di.testModule
+import com.mctryn.moviedb.domain.model.Movie
+import com.mctryn.moviedb.domain.repository.MovieRepository
+import com.mctryn.moviedb.presentation.list.pages.MovieListPageObject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
+import org.koin.core.context.stopKoin
+import org.koin.test.KoinTestRule
+
+/**
+ * Integration Test for MovieListScreen.
+ * Real ViewModel + Mocked Use Cases + Real UI
+ * 
+ * ## Manual Emission Pattern
+ * 
+ * This test demonstrates how to manually control Flow emissions from tests:
+ * 
+ * 1. Before screen launch - emit Loading state
+ * 2. After delay/condition - emit Success with data
+ * 3. Test error scenarios - emit Error state
+ * 4. Multiple emissions - emit new data during test execution
+ */
+@RunWith(JUnit4::class)
+class MovieListIntegrationTest {
+
+    @get:Rule
+    val koinTestRule = KoinTestRule.create {
+        modules(testModule)
+    }
+
+    @get:Rule
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+
+    private lateinit var page: MovieListPageObject
+    private lateinit var testRepository: MockRepository
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Before
+    fun setup() {
+        page = MovieListPageObject(composeTestRule)
+        testRepository = koinTestRule.koin.get<MovieRepository>() as MockRepository
+
+        // Emit initial Loading state (as if data is being fetched)
+        testRepository.emitPopularMoviesLoading()
+
+        // Optional: Set custom refresh result for pull-to-refresh tests
+        testRepository.setRefreshResult(success = true)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @After
+    fun teardown() {
+        stopKoin()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun happyPath_completeUserJourney() = runTest {
+        // ═══════════════════════════════════════════════════════════════
+        // STEP 1: Screen launches - should show Loading state
+        // ═══════════════════════════════════════════════════════════════
+
+        composeTestRule.setContent {
+            MovieListScreen(onNavigateToDetails = { })
+        }
+
+        page.verifyLoading()
+
+        // ═══════════════════════════════════════════════════════════════
+        // STEP 2: Emit Success with movies - populate the list
+        // ═══════════════════════════════════════════════════════════════
+
+        testRepository.emitPopularMovies(testMovies)
+
+        composeTestRule.waitForIdle()
+
+        page.verifyMovieTitle("Titanic")
+        page.verifyMovieTitle("Inception")
+        page.verifyMovieTitle("The Matrix")
+
+        // ═══════════════════════════════════════════════════════════════
+        // STEP 3: Verify TopAppBar
+        // ═══════════════════════════════════════════════════════════════
+
+        page.verifyTitle("Movie Browser")
+
+        // ═══════════════════════════════════════════════════════════════
+        // STEP 4: Verify movie list exists
+        // ═══════════════════════════════════════════════════════════════
+
+        page.verifyMoviesCount(3)
+
+        // ═══════════════════════════════════════════════════════════════
+        // STEP 5: Scroll to last movie (The Matrix)
+        // ═══════════════════════════════════════════════════════════════
+
+        page.scrollToMovie("The Matrix")
+        page.verifyMovieTitle("The Matrix")
+
+    }
+}
+
+private val sampleMovies = listOf(
+    Movie(1, "Titanic", "A love story on the famous ship", null, "1997-12-19", 7.9, 22000, false),
+    Movie(2, "Inception", "A dream within a dream", null, "2010-07-16", 8.4, 32000, false),
+    Movie(3, "The Matrix", "What is real?", null, "1999-03-31", 8.2, 25000, false)
+)
+
+val testMovies: List<Movie> = sampleMovies

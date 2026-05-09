@@ -1,20 +1,21 @@
 package com.mctryn.moviedb.di
 
+import com.mctryn.moviedb.domain.usecase.GetMovieDetailsUseCase
+import com.mctryn.moviedb.domain.usecase.GetPopularMoviesUseCase
+import com.mctryn.moviedb.domain.usecase.ObserveFavoritesUseCase
+import com.mctryn.moviedb.domain.usecase.ToggleFavoriteUseCase
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 /**
- * Use case module for domain layer dependencies.
+ * Use Case module for dependency injection.
  * 
- * TODO: Phase 3 - Implement use cases
- * - GetPopularMoviesUseCase
- * - GetMovieDetailsUseCase
- * - ToggleFavoriteUseCase
- * - ObserveFavoritesUseCase
+ * Provides use cases from the domain layer.
  */
 val useCaseModule = module {
-    // TODO: Add use case providers
-    // factory { GetPopularMoviesUseCase(get()) }
-    // factory { GetMovieDetailsUseCase(get()) }
-    // factory { ToggleFavoriteUseCase(get()) }
-    // factory { ObserveFavoritesUseCase(get()) }
+    // Use Cases
+    singleOf(::GetPopularMoviesUseCase)
+    singleOf(::GetMovieDetailsUseCase)
+    singleOf(::ToggleFavoriteUseCase)
+    singleOf(::ObserveFavoritesUseCase)
 }
