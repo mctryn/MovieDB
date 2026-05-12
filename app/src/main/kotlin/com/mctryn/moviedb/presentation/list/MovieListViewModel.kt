@@ -4,11 +4,15 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mctryn.moviedb.domain.model.Movie
 import com.mctryn.moviedb.domain.model.RepositoryState
 import com.mctryn.moviedb.domain.usecase.GetPopularMoviesUseCase
 import com.mctryn.moviedb.domain.usecase.ToggleFavoriteUseCase
 import com.mctryn.moviedb.navigation.NavigationManager
+import com.mctryn.moviedb.presentation.list.FavoriteIconState.Checked
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -36,7 +40,6 @@ interface IMovieListViewModel {
 class MovieListViewModel(
     private val getPopularMoviesUseCase: GetPopularMoviesUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
-    private val savedStateHandle: SavedStateHandle,
     private val navigationManager: NavigationManager,
     private val dispatcher: CoroutineDispatcher
 ) : ViewModel(), IMovieListViewModel {
@@ -45,17 +48,16 @@ class MovieListViewModel(
         private const val KEY_PAGE = "movie_list_page"
     }
 
-    // Favorite click handler - uses use case
     private val _onFavoriteClickCallback: (Int) -> Unit = { id ->
         viewModelScope.launch {
             toggleFavoriteUseCase(id)
         }
     }
-
     override val uiState: StateFlow<MovieListUiState> = getPopularMoviesUseCase()
         .toUiState(
             navigationManager = navigationManager,
-            onFavoriteClick = _onFavoriteClickCallback
+            onFavoriteClick = _onFavoriteClickCallback,
+            refresh = { refresh() }
         )
         .stateIn(
             scope = viewModelScope,
@@ -84,20 +86,33 @@ class MovieListViewModel(
  * Extension function to map RepositoryState to MovieListUiState.
  * Uses [NavigationManager] for navigation to details screen.
  */
-private fun kotlinx.coroutines.flow.Flow<RepositoryState<List<com.mctryn.moviedb.domain.model.Movie>>>.toUiState(
+private fun Flow<RepositoryState<List<Movie>>>.toUiState(
     navigationManager: NavigationManager,
-    onFavoriteClick: (Int) -> Unit
-): kotlinx.coroutines.flow.Flow<MovieListUiState> = map { repoState ->
+    onFavoriteClick: (Int) -> Unit,
+    refresh: () -> Unit
+): Flow<MovieListUiState> = map { repoState ->
     when (repoState) {
         is RepositoryState.Loading -> MovieListUiState.Loading
         is RepositoryState.Error -> MovieListUiState.Error(
             message = repoState.message,
-            onRetry = null // Set by ViewModel
+            onRetry = refresh
         )
-        is RepositoryState.Success -> MovieListUiState.Content(
-            movies = repoState.data,
-            onMovieClick = { movieId -> navigationManager.navigateToMovieDetails(movieId) },
-            onFavoriteClick = onFavoriteClick
-        )
+
+        is RepositoryState.Success -> {
+            val favoriteStates = repoState.data.associate { movie ->
+                movie.id to if (movie.isFavorite) {
+                    Checked(movie.id) { onFavoriteClick(movie.id) }
+                } else {
+                    FavoriteIconState.Unchecked(movie.id) { onFavoriteClick(movie.id) }
+                }
+            }
+
+            MovieListUiState.Content(
+                movies = repoState.data,
+                onMovieClick = { movieId -> navigationManager.navigateToMovieDetails(movieId) },
+                onFavoriteClick = onFavoriteClick,
+                favoriteStates = favoriteStates
+            )
+        }
     }
 }

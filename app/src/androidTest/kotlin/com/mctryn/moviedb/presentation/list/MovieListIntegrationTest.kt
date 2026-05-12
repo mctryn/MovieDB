@@ -53,58 +53,212 @@ class MovieListIntegrationTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun happyPath_completeUserJourney() = runTest {
+    fun userStory_browseRefreshRecoverAndOpenDetails() = runTest {
         composeTestRule.setContent {
             MovieListScreen()
         }
+
         page.verifyLoading()
+
         testRepository.emitPopularMovies(testMovies)
         composeTestRule.waitForIdle()
+
+        page.verifyTitle("Movie Browser")
         page.verifyMovieTitle("Titanic")
         page.verifyMovieTitle("Inception")
-        page.verifyMovieTitle("The Matrix")
-        page.verifyTitle("Movie Browser")
         page.verifyMoviesCount(3)
-        page.verifyMovieRating("Titanic", 7.9)
-        page.scrollToMovie("The Matrix")
-        page.verifyMovieTitle("The Matrix")
-    }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Test
-    fun navigateFromContentState_navigatesToDetails() = runTest {
-        composeTestRule.setContent {
-            MovieListScreen()
-        }
-        testRepository.emitPopularMovies(testMovies)
+        page.clickRefresh()
+
+        testRepository.emitPopularMoviesError("Network unavailable")
         composeTestRule.waitForIdle()
+
+        page.verifyError("Network unavailable")
+        page.verifyRetryButton()
+
+        page.clickRetry()
+
+        testRepository.emitPopularMoviesLoading()
+        composeTestRule.waitForIdle()
+        page.verifyLoading()
+
+        val refreshedMovies = testMovies.map { movie ->
+            if (movie.id == 2) movie.copy(voteAverage = 8.5) else movie
+        }
+        testRepository.emitPopularMovies(refreshedMovies)
+        composeTestRule.waitForIdle()
+
+        page.verifyMovieTitle("Inception")
+        page.verifyMovieRating("Inception", 8.5)
+
         page.clickMovie("Inception")
         testNavManager.assertNavigatedToMovieId(2)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun toggleFavorite_marksAsFavorite() = runTest {
+    fun userStory_favoriteLifecycle_fromAddToRemove_persistedByFlow() = runTest {
         composeTestRule.setContent {
             MovieListScreen()
         }
+
         testRepository.emitPopularMovies(testMovies)
         composeTestRule.waitForIdle()
+
+        page.verifyMovieTitle("Titanic")
+        page.verifyFavoriteIsAdd(1)
+
         testRepository.resetToggleFavoriteCalls()
-        page.clickFavorite(1)
+        page.clickToFavorite(1)
         testRepository.assertToggleFavoriteCalled(1)
-        val updatedMovies = testMovies.map { movie ->
+
+        val favoritedMovies = testMovies.map { movie ->
             if (movie.id == 1) movie.copy(isFavorite = true) else movie
+        }
+        testRepository.emitPopularMovies(favoritedMovies)
+        composeTestRule.waitForIdle()
+
+        page.verifyFavoriteIsRemove(1)
+
+        page.clickToUnfavorite(1)
+        testRepository.assertToggleFavoriteCalled(1)
+
+        val unfavoritedMovies = favoritedMovies.map { movie ->
+            if (movie.id == 1) movie.copy(isFavorite = false) else movie
+        }
+        testRepository.emitPopularMovies(unfavoritedMovies)
+        composeTestRule.waitForIdle()
+
+        page.verifyFavoriteIsAdd(1)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun userStory_errorFirst_thenRetry_toUsableState() = runTest {
+        composeTestRule.setContent {
+            MovieListScreen()
+        }
+
+        page.verifyLoading()
+
+        testRepository.emitPopularMoviesError("Service unavailable")
+        composeTestRule.waitForIdle()
+
+        page.verifyError("Service unavailable")
+        page.verifyRetryButton()
+
+        page.clickRetry()
+
+        testRepository.emitPopularMovies(testMovies)
+        composeTestRule.waitForIdle()
+
+        page.verifyMovieTitle("The Matrix")
+
+        page.clickToFavorite(3)
+        testRepository.assertToggleFavoriteCalled(3)
+
+        val updatedMovies = testMovies.map { movie ->
+            if (movie.id == 3) movie.copy(isFavorite = true) else movie
         }
         testRepository.emitPopularMovies(updatedMovies)
         composeTestRule.waitForIdle()
+
+        page.verifyFavoriteIsRemove(3)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun userStory_multiAction_session_stays_consistent() = runTest {
+        composeTestRule.setContent {
+            MovieListScreen()
+        }
+
+        testRepository.emitPopularMovies(testMovies)
+        composeTestRule.waitForIdle()
+
+        page.verifyMovieTitle("Titanic")
+        page.verifyMovieTitle("Inception")
+        page.verifyMovieTitle("The Matrix")
+
+        page.clickToFavorite(1)
+        page.clickToFavorite(2)
+
+        testRepository.assertToggleFavoriteCalled(1)
+        testRepository.assertToggleFavoriteCalled(2)
+
+        val favoritedFirstTwo = testMovies.map { movie ->
+            when (movie.id) {
+                1, 2 -> movie.copy(isFavorite = true)
+                else -> movie
+            }
+        }
+        testRepository.emitPopularMovies(favoritedFirstTwo)
+        composeTestRule.waitForIdle()
+
+        page.verifyFavoriteIsRemove(1)
+        page.verifyFavoriteIsRemove(2)
+
+        page.clickRefresh()
+        testRepository.emitPopularMovies(favoritedFirstTwo)
+        composeTestRule.waitForIdle()
+
+        page.verifyFavoriteIsRemove(1)
+        page.verifyFavoriteIsRemove(2)
+
+        page.clickMovie("Titanic")
+        testNavManager.assertNavigatedToMovieId(1)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun statePreservation_afterRecreate_keepsContentAndFavoriteState() = runTest {
+        composeTestRule.setContent {
+            MovieListScreen()
+        }
+
+        testRepository.emitPopularMovies(testMovies)
+        composeTestRule.waitForIdle()
+        page.verifyMovieTitle("Titanic")
+        page.verifyFavoriteIsAdd(1)
+
+        page.clickToFavorite(1)
+        testRepository.assertToggleFavoriteCalled(1)
+
+        val favorited = testMovies.map { movie ->
+            if (movie.id == 1) movie.copy(isFavorite = true) else movie
+        }
+        testRepository.emitPopularMovies(favorited)
+        composeTestRule.waitForIdle()
+        page.verifyFavoriteIsRemove(1)
+
+        composeTestRule.activityRule.scenario.recreate()
+        composeTestRule.setContent {
+            MovieListScreen()
+        }
+        composeTestRule.waitForIdle()
+
+        page.verifyMovieTitle("Titanic")
+        page.verifyMovieTitle("Inception")
+        page.verifyMovieTitle("The Matrix")
+        page.verifyFavoriteIsRemove(1)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun emptyList_showsEmptyMessage() = runTest {
+        composeTestRule.setContent {
+            MovieListScreen()
+        }
+
+        testRepository.emitPopularMovies(emptyList())
+        composeTestRule.waitForIdle()
+
+        page.verifyEmptyState()
     }
 }
 
-private val sampleMovies = listOf(
+private val testMovies = listOf(
     Movie(1, "Titanic", "A love story on the famous ship", null, "1997-12-19", 7.9, 22000, false),
     Movie(2, "Inception", "A dream within a dream", null, "2010-07-16", 8.4, 32000, false),
     Movie(3, "The Matrix", "What is real?", null, "1999-03-31", 8.2, 25000, false)
 )
-
-val testMovies: List<Movie> = sampleMovies

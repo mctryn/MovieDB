@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MovieDB</string>
+    <string name="movie_list_title">Movie Browser</string>
+    <string name="loading_movies">Loading movies…</string>
+    <string name="retry">Retry</string>
+    <string name="empty_movies">No movies found</string>
 </resources>

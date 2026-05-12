@@ -3,29 +3,21 @@ package com.mctryn.moviedb.presentation.list.pages
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
-import com.mctryn.moviedb.domain.model.Movie
+import androidx.compose.ui.test.performScrollToNode
 
-/**
- * Page Object for Movie List Screen.
- */
-class MovieListPageObject(private val provider: SemanticsNodeInteractionsProvider) {
-
-    fun verifyTitle(title: String) {
-        provider.onNodeWithText(title).assertIsDisplayed()
-    }
+class MovieListPageObject(
+    private val provider: SemanticsNodeInteractionsProvider
+) {
 
     fun verifyLoading() {
-        provider.onNodeWithText("Loading movies...").assertIsDisplayed()
-    }
-
-    fun verifyContent() {
-        provider.onNodeWithText("Content").assertIsDisplayed()
+        provider.onNodeWithText("Loading movies…").assertIsDisplayed()
     }
 
     fun verifyError(message: String) {
@@ -40,46 +32,55 @@ class MovieListPageObject(private val provider: SemanticsNodeInteractionsProvide
         provider.onNodeWithText("Retry").performClick()
     }
 
-    fun verifyMovies(count: Int) {
-        provider.onAllNodesWithText("Movie").assertCountEquals(count)
+    fun verifyEmptyState() {
+        provider.onNodeWithText("No movies found").assertIsDisplayed()
     }
 
-    fun verifyMoviesCount(count: Int) {
-        // Verify count by checking unique movie titles
-        provider.onNodeWithText("Titanic").assertExists()
-        provider.onNodeWithText("Inception").assertExists()
-        provider.onNodeWithText("The Matrix").assertExists()
+    fun verifyTitle(title: String) {
+        provider.onNodeWithText(title).assertIsDisplayed()
     }
 
     fun verifyMovieTitle(title: String) {
         provider.onNodeWithText(title).assertIsDisplayed()
     }
 
-    fun verifyMovieRating(title: String, rating: Double) {
-        provider.onNodeWithText("$rating").assertIsDisplayed()
+    fun verifyMovieRating(movieTitle: String, rating: Double) {
+        provider.onNodeWithText(movieTitle).assertIsDisplayed()
+        provider.onNodeWithText("${rating}").assertIsDisplayed()
     }
 
-    fun verifyEmptyState() {
-        provider.onNodeWithText("No movies found").assertIsDisplayed()
+    fun verifyMoviesCount(expectedCount: Int) {
+        provider.onAllNodesWithContentDescription("favorite", substring = true)
+            .assertCountEquals(expectedCount)
+    }
+
+    fun scrollToMovie(title: String) {
+        provider
+            .onNode(hasClickAction())
+            .performScrollToNode(hasText(title))
     }
 
     fun clickMovie(title: String) {
         provider.onNodeWithText(title).performClick()
     }
 
-    fun scrollToMovie(title: String) {
-        provider.onNodeWithText(title).performScrollTo()
+    fun clickRefresh() {
+        provider.onNodeWithContentDescription("Refresh movies").performClick()
     }
 
-    fun verifyFavoriteIcon() {
-        provider.onNodeWithContentDescription("Favorite").assertIsDisplayed()
-    }
-
-    fun clickFavorite(movieId: Int) {
+    fun clickToFavorite(movieId: Int) {
         provider.onNodeWithContentDescription("Toggle favorite $movieId").performClick()
     }
 
-    fun waitForContent(timeoutMs: Long = 5000) {
-        Thread.sleep(timeoutMs)
+    fun clickToUnfavorite(movieId: Int) {
+        provider.onNodeWithContentDescription("Untoggle favorite $movieId").performClick()
+    }
+
+    fun verifyFavoriteIsAdd(movieId: Int) {
+        provider.onNode(hasContentDescription("Toggle favorite $movieId")).assertIsDisplayed()
+    }
+
+    fun verifyFavoriteIsRemove(movieId: Int) {
+        provider.onNode(hasContentDescription("Untoggle favorite $movieId")).assertIsDisplayed()
     }
 }
