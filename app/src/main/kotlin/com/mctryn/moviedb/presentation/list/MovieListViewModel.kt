@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mctryn.moviedb.domain.model.RepositoryState
 import com.mctryn.moviedb.domain.usecase.GetPopularMoviesUseCase
-import com.mctryn.moviedb.domain.usecase.ObserveFavoritesUseCase
 import com.mctryn.moviedb.domain.usecase.ToggleFavoriteUseCase
+import com.mctryn.moviedb.navigation.NavigationManager
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -30,12 +30,14 @@ interface IMovieListViewModel {
 /**
  * Implementation of MovieListViewModel.
  * Maps RepositoryState to UiState using Flow transformations.
+ * 
+ * Uses [NavigationManager] for navigation to details screen.
  */
 class MovieListViewModel(
     private val getPopularMoviesUseCase: GetPopularMoviesUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
-    private val observeFavoritesUseCase: ObserveFavoritesUseCase,
     private val savedStateHandle: SavedStateHandle,
+    private val navigationManager: NavigationManager,
     private val dispatcher: CoroutineDispatcher
 ) : ViewModel(), IMovieListViewModel {
 
@@ -43,7 +45,7 @@ class MovieListViewModel(
         private const val KEY_PAGE = "movie_list_page"
     }
 
-    private val _onMovieClickCallback: (Int) -> Unit = { }
+    // Favorite click handler - uses use case
     private val _onFavoriteClickCallback: (Int) -> Unit = { id ->
         viewModelScope.launch {
             toggleFavoriteUseCase(id)
@@ -52,7 +54,7 @@ class MovieListViewModel(
 
     override val uiState: StateFlow<MovieListUiState> = getPopularMoviesUseCase()
         .toUiState(
-            onMovieClick = _onMovieClickCallback,
+            navigationManager = navigationManager,
             onFavoriteClick = _onFavoriteClickCallback
         )
         .stateIn(
@@ -60,10 +62,6 @@ class MovieListViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = MovieListUiState.Loading
         )
-
-    init {
-        observeFavorites()
-    }
 
     override fun refresh() {
         viewModelScope.launch {
@@ -78,36 +76,16 @@ class MovieListViewModel(
     }
 
     override fun onMovieClick(movieId: Int) {
-        _onMovieClickCallback(movieId)
-    }
-
-    fun setNavigationCallback(callback: (Int) -> Unit) {
-        // Update the callback reference if needed
-    }
-
-    private fun observeFavorites() {
-        viewModelScope.launch {
-            observeFavoritesUseCase()
-                .collect { favoritesState ->
-                    if (favoritesState is RepositoryState.Success) {
-                        val currentState = uiState.value
-                        if (currentState is MovieListUiState.Content) {
-                            val favoriteIds = favoritesState.data.map { it.id }.toSet()
-                            val updatedMovies = currentState.movies.map { movie ->
-                                movie.copy(isFavorite = favoriteIds.contains(movie.id))
-                            }
-                        }
-                    }
-                }
-        }
+        navigationManager.navigateToMovieDetails(movieId)
     }
 }
 
 /**
  * Extension function to map RepositoryState to MovieListUiState.
+ * Uses [NavigationManager] for navigation to details screen.
  */
 private fun kotlinx.coroutines.flow.Flow<RepositoryState<List<com.mctryn.moviedb.domain.model.Movie>>>.toUiState(
-    onMovieClick: (Int) -> Unit,
+    navigationManager: NavigationManager,
     onFavoriteClick: (Int) -> Unit
 ): kotlinx.coroutines.flow.Flow<MovieListUiState> = map { repoState ->
     when (repoState) {
@@ -118,7 +96,7 @@ private fun kotlinx.coroutines.flow.Flow<RepositoryState<List<com.mctryn.moviedb
         )
         is RepositoryState.Success -> MovieListUiState.Content(
             movies = repoState.data,
-            onMovieClick = onMovieClick,
+            onMovieClick = { movieId -> navigationManager.navigateToMovieDetails(movieId) },
             onFavoriteClick = onFavoriteClick
         )
     }

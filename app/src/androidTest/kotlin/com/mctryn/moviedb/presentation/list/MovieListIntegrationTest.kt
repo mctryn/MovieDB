@@ -6,6 +6,8 @@ import com.mctryn.moviedb.di.MockRepository
 import com.mctryn.moviedb.di.testModule
 import com.mctryn.moviedb.domain.model.Movie
 import com.mctryn.moviedb.domain.repository.MovieRepository
+import com.mctryn.moviedb.navigation.NavigationManager
+import com.mctryn.moviedb.navigation.TestNavigationManager
 import com.mctryn.moviedb.presentation.list.pages.MovieListPageObject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -18,19 +20,6 @@ import org.junit.runners.JUnit4
 import org.koin.core.context.stopKoin
 import org.koin.test.KoinTestRule
 
-/**
- * Integration Test for MovieListScreen.
- * Real ViewModel + Mocked Use Cases + Real UI
- * 
- * ## Manual Emission Pattern
- * 
- * This test demonstrates how to manually control Flow emissions from tests:
- * 
- * 1. Before screen launch - emit Loading state
- * 2. After delay/condition - emit Success with data
- * 3. Test error scenarios - emit Error state
- * 4. Multiple emissions - emit new data during test execution
- */
 @RunWith(JUnit4::class)
 class MovieListIntegrationTest {
 
@@ -44,18 +33,16 @@ class MovieListIntegrationTest {
 
     private lateinit var page: MovieListPageObject
     private lateinit var testRepository: MockRepository
+    private lateinit var testNavManager: TestNavigationManager
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setup() {
         page = MovieListPageObject(composeTestRule)
         testRepository = koinTestRule.koin.get<MovieRepository>() as MockRepository
-
-        // Emit initial Loading state (as if data is being fetched)
+        testNavManager = koinTestRule.koin.get<NavigationManager>() as TestNavigationManager
+        testNavManager.reset()
         testRepository.emitPopularMoviesLoading()
-
-        // Optional: Set custom refresh result for pull-to-refresh tests
-        testRepository.setRefreshResult(success = true)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -67,47 +54,50 @@ class MovieListIntegrationTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun happyPath_completeUserJourney() = runTest {
-        // ═══════════════════════════════════════════════════════════════
-        // STEP 1: Screen launches - should show Loading state
-        // ═══════════════════════════════════════════════════════════════
-
         composeTestRule.setContent {
-            MovieListScreen(onNavigateToDetails = { })
+            MovieListScreen()
         }
-
         page.verifyLoading()
-
-        // ═══════════════════════════════════════════════════════════════
-        // STEP 2: Emit Success with movies - populate the list
-        // ═══════════════════════════════════════════════════════════════
-
         testRepository.emitPopularMovies(testMovies)
-
         composeTestRule.waitForIdle()
-
         page.verifyMovieTitle("Titanic")
         page.verifyMovieTitle("Inception")
         page.verifyMovieTitle("The Matrix")
-
-        // ═══════════════════════════════════════════════════════════════
-        // STEP 3: Verify TopAppBar
-        // ═══════════════════════════════════════════════════════════════
-
         page.verifyTitle("Movie Browser")
-
-        // ═══════════════════════════════════════════════════════════════
-        // STEP 4: Verify movie list exists
-        // ═══════════════════════════════════════════════════════════════
-
         page.verifyMoviesCount(3)
-
-        // ═══════════════════════════════════════════════════════════════
-        // STEP 5: Scroll to last movie (The Matrix)
-        // ═══════════════════════════════════════════════════════════════
-
+        page.verifyMovieRating("Titanic", 7.9)
         page.scrollToMovie("The Matrix")
         page.verifyMovieTitle("The Matrix")
+    }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun navigateFromContentState_navigatesToDetails() = runTest {
+        composeTestRule.setContent {
+            MovieListScreen()
+        }
+        testRepository.emitPopularMovies(testMovies)
+        composeTestRule.waitForIdle()
+        page.clickMovie("Inception")
+        testNavManager.assertNavigatedToMovieId(2)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun toggleFavorite_marksAsFavorite() = runTest {
+        composeTestRule.setContent {
+            MovieListScreen()
+        }
+        testRepository.emitPopularMovies(testMovies)
+        composeTestRule.waitForIdle()
+        testRepository.resetToggleFavoriteCalls()
+        page.clickFavorite(1)
+        testRepository.assertToggleFavoriteCalled(1)
+        val updatedMovies = testMovies.map { movie ->
+            if (movie.id == 1) movie.copy(isFavorite = true) else movie
+        }
+        testRepository.emitPopularMovies(updatedMovies)
+        composeTestRule.waitForIdle()
     }
 }
 

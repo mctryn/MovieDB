@@ -61,8 +61,18 @@ class MockRepository : MovieRepository {
     // ─────────────────────────────────────────────────────────────────
 
     private var _refreshResult: Result<Unit> = Result.success(Unit)
+    private val refreshCalls = mutableListOf<Unit>()
 
-    override suspend fun refreshPopularMovies(): Result<Unit> = _refreshResult
+    override suspend fun refreshPopularMovies(): Result<Unit> {
+        refreshCalls.add(Unit)
+        return _refreshResult
+    }
+
+    fun assertRefreshCalled() {
+        if (refreshCalls.isEmpty()) {
+            throw AssertionError("refreshPopularMovies() was not called")
+        }
+    }
 
     /**
      * Set the result for the next refreshPopularMovies() call.
@@ -153,8 +163,22 @@ class MockRepository : MovieRepository {
     // ─────────────────────────────────────────────────────────────────
 
     private var _toggleFavoriteResult: Result<Unit> = Result.success(Unit)
+    private val toggleFavoriteCalls = mutableListOf<Int>()
 
-    override suspend fun toggleFavorite(movieId: Int): Result<Unit> = _toggleFavoriteResult
+    override suspend fun toggleFavorite(movieId: Int): Result<Unit> {
+        toggleFavoriteCalls.add(movieId)
+        return _toggleFavoriteResult
+    }
+
+    fun assertToggleFavoriteCalled(movieId: Int) {
+        if (movieId !in toggleFavoriteCalls) {
+            throw AssertionError("toggleFavorite($movieId) was not called. Calls: $toggleFavoriteCalls")
+        }
+    }
+
+    fun resetToggleFavoriteCalls() {
+        toggleFavoriteCalls.clear()
+    }
 
     /**
      * Set the result for the next toggleFavorite() call.

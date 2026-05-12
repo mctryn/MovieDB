@@ -4,8 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import com.mctryn.moviedb.domain.model.Movie
 import com.mctryn.moviedb.domain.repository.MovieRepository
 import com.mctryn.moviedb.domain.usecase.GetPopularMoviesUseCase
-import com.mctryn.moviedb.domain.usecase.ObserveFavoritesUseCase
 import com.mctryn.moviedb.domain.usecase.ToggleFavoriteUseCase
+import com.mctryn.moviedb.navigation.NavigationManager
+import com.mctryn.moviedb.navigation.TestNavigationManager
 import com.mctryn.moviedb.presentation.list.MovieListViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,21 +30,24 @@ import org.koin.dsl.module
  * 
  * // Or emit error
  * testRepository.emitPopularMoviesError("Custom error")
+ * 
+ * // Navigation verification
+ * testNavManager.assertNavigatedToMovieId(123)
  * ```
  */
 val testModule = module {
     single<CoroutineDispatcher> { StandardTestDispatcher() }
     single<MovieRepository> { MockRepository() }
+    single<NavigationManager> { TestNavigationManager() }
     factory<GetPopularMoviesUseCase> { GetPopularMoviesUseCase(get()) }
     factory<ToggleFavoriteUseCase> { ToggleFavoriteUseCase(get()) }
-    factory<ObserveFavoritesUseCase> { ObserveFavoritesUseCase(get()) }
 
     viewModel {
         MovieListViewModel(
             getPopularMoviesUseCase = get(),
             toggleFavoriteUseCase = get(),
-            observeFavoritesUseCase = get(),
             savedStateHandle = SavedStateHandle(),
+            navigationManager = get(),
             dispatcher = get()
         )
     }
