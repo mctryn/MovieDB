@@ -1,4 +1,4 @@
-package com.mctryn.moviedb.presentation.list.components
+package com.mctryn.moviedb.presentation.common
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.mctryn.moviedb.domain.model.Movie
 import com.mctryn.moviedb.presentation.list.FavoriteIconState
 
 /**
@@ -27,7 +26,7 @@ import com.mctryn.moviedb.presentation.list.FavoriteIconState
 @Composable
 fun MovieCard(
     modifier: Modifier = Modifier,
-    movie: Movie,
+    movie: MovieItemUiModel,
     onClick: () -> Unit,
     favoriteState: FavoriteIconState
 ) {

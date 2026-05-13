@@ -1,4 +1,4 @@
-package com.mctryn.moviedb.presentation.list.components
+package com.mctryn.moviedb.presentation.common
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mctryn.moviedb.R
-import com.mctryn.moviedb.domain.model.Movie
 import com.mctryn.moviedb.presentation.list.FavoriteIconState
 
 
@@ -20,10 +19,9 @@ import com.mctryn.moviedb.presentation.list.FavoriteIconState
 @Composable
 fun MovieListContent(
     modifier: Modifier = Modifier,
-    movies: List<Movie>,
+    movies: List<MovieItemUiModel>,
     onMovieClick: (Int) -> Unit,
     onFavoriteClick: (Int) -> Unit,
-    favoriteStates: Map<Int, FavoriteIconState> = emptyMap(),
 ) {
     if (movies.isEmpty()) {
         EmptyPane(message = stringResource(R.string.empty_movies))
@@ -40,8 +38,11 @@ fun MovieListContent(
                 MovieCard(
                     movie = movie,
                     onClick = { onMovieClick(movie.id) },
-                    favoriteState = favoriteStates[movie.id]
-                        ?: FavoriteIconState.Unchecked(movie.id) { onFavoriteClick(movie.id) }
+                    favoriteState = if (movie.isFavorite) {
+                        FavoriteIconState.Checked(movie.id) { onFavoriteClick(movie.id) }
+                    } else {
+                        FavoriteIconState.Unchecked(movie.id) { onFavoriteClick(movie.id) }
+                    }
                 )
             }
         }

@@ -1,4 +1,4 @@
-package com.mctryn.moviedb.presentation.list.components
+package com.mctryn.moviedb.presentation.common
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

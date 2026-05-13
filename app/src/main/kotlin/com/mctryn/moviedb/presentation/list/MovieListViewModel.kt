@@ -1,7 +1,6 @@
 package com.mctryn.moviedb.presentation.list
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mctryn.moviedb.domain.model.Movie
@@ -9,10 +8,9 @@ import com.mctryn.moviedb.domain.model.RepositoryState
 import com.mctryn.moviedb.domain.usecase.GetPopularMoviesUseCase
 import com.mctryn.moviedb.domain.usecase.ToggleFavoriteUseCase
 import com.mctryn.moviedb.navigation.NavigationManager
-import com.mctryn.moviedb.presentation.list.FavoriteIconState.Checked
+import com.mctryn.moviedb.presentation.common.toUiModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -43,10 +41,6 @@ class MovieListViewModel(
     private val navigationManager: NavigationManager,
     private val dispatcher: CoroutineDispatcher
 ) : ViewModel(), IMovieListViewModel {
-
-    companion object {
-        private const val KEY_PAGE = "movie_list_page"
-    }
 
     private val _onFavoriteClickCallback: (Int) -> Unit = { id ->
         viewModelScope.launch {
@@ -99,19 +93,10 @@ private fun Flow<RepositoryState<List<Movie>>>.toUiState(
         )
 
         is RepositoryState.Success -> {
-            val favoriteStates = repoState.data.associate { movie ->
-                movie.id to if (movie.isFavorite) {
-                    Checked(movie.id) { onFavoriteClick(movie.id) }
-                } else {
-                    FavoriteIconState.Unchecked(movie.id) { onFavoriteClick(movie.id) }
-                }
-            }
-
             MovieListUiState.Content(
-                movies = repoState.data,
+                movies = repoState.data.map { it.toUiModel() },
                 onMovieClick = { movieId -> navigationManager.navigateToMovieDetails(movieId) },
                 onFavoriteClick = onFavoriteClick,
-                favoriteStates = favoriteStates
             )
         }
     }
