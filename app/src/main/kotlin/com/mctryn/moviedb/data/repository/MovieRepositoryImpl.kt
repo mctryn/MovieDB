@@ -31,7 +31,11 @@ class MovieRepositoryImpl(
             val result = movieDataSource.getPopularMovies(page = 1)
             result.fold(
                 onSuccess = { movies ->
-                    cacheDataSource.saveMoviesTransactional(movies)
+                    val existingMoviesById = cacheDataSource.getMovies().associateBy { it.id }
+                    val mergedMovies = movies.map { movie ->
+                        movie.copy(isFavorite = existingMoviesById[movie.id]?.isFavorite ?: movie.isFavorite)
+                    }
+                    cacheDataSource.saveMoviesTransactional(mergedMovies)
                     cacheDataSource.getMoviesFlow().collect { emit(RepositoryState.Success(it)) }
                 },
                 onFailure = { error ->
@@ -48,7 +52,11 @@ class MovieRepositoryImpl(
             try {
                 val result = movieDataSource.getPopularMovies(page = 1)
                 result.getOrNull()?.let { movies ->
-                    cacheDataSource.saveMoviesTransactional(movies)
+                    val existingMoviesById = cacheDataSource.getMovies().associateBy { it.id }
+                    val mergedMovies = movies.map { movie ->
+                        movie.copy(isFavorite = existingMoviesById[movie.id]?.isFavorite ?: movie.isFavorite)
+                    }
+                    cacheDataSource.saveMoviesTransactional(mergedMovies)
                 }
                 Result.success(Unit)
             } catch (e: Exception) {
@@ -73,7 +81,10 @@ class MovieRepositoryImpl(
             try {
                 movieDataSource.getMovieDetails(movieId).fold(
                     onSuccess = { movie ->
-                        cacheDataSource.saveMovie(movie)
+                        val existingMovie = cacheDataSource.getMovieById(movieId)
+                        cacheDataSource.saveMovie(
+                            movie.copy(isFavorite = existingMovie?.isFavorite ?: movie.isFavorite)
+                        )
                         Result.success(Unit)
                     },
                     onFailure = { error ->

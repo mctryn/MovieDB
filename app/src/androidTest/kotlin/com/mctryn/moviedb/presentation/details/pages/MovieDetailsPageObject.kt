@@ -12,7 +12,7 @@ class MovieDetailsPageObject(
     private val provider: ComposeTestRule
 ) {
     fun verifyLoading() {
-        provider.onNodeWithText("Loading details...").assertIsDisplayed()
+        provider.onNodeWithText("Loading favorites…").assertIsDisplayed()
     }
 
     @OptIn(ExperimentalTestApi::class)

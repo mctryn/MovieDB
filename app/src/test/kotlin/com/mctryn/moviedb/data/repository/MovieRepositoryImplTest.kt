@@ -120,6 +120,27 @@ class MovieRepositoryImplTest {
     }
 
     @Test
+    fun `getPopularMovies should preserve favorite status from cache when refreshing remote list`() = runTest {
+        // Given
+        val response = MovieListResponse(
+            page = 1,
+            results = listOf(testMovieDto),
+            totalPages = 1,
+            totalResults = 1
+        )
+        whenever(apiService.getPopularMovies(page = 1)).thenReturn(response)
+        whenever(cacheDataSource.getMovies()).thenReturn(listOf(testMovie.copy(isFavorite = true)))
+        whenever(cacheDataSource.getMoviesFlow()).thenReturn(flowOf(listOf(testMovie.copy(isFavorite = true))))
+
+        // When
+        val result = repository.getPopularMovies().first { it is RepositoryState.Success }
+
+        // Then
+        assertTrue(result is RepositoryState.Success)
+        assertEquals(true, (result as RepositoryState.Success).data.first().isFavorite)
+    }
+
+    @Test
     fun `getPopularMovies should use cached data when cache is not empty`() = runTest {
         // Given
         whenever(cacheDataSource.getMovies()).thenReturn(listOf(testMovie))
@@ -130,6 +151,26 @@ class MovieRepositoryImplTest {
 
         // Then
         assertTrue(result is RepositoryState.Success)
+    }
+
+    @Test
+    fun `refreshPopularMovies should preserve favorite status from cache`() = runTest {
+        // Given
+        val response = MovieListResponse(
+            page = 1,
+            results = listOf(testMovieDto),
+            totalPages = 1,
+            totalResults = 1
+        )
+        whenever(apiService.getPopularMovies(page = 1)).thenReturn(response)
+        whenever(cacheDataSource.getMovies()).thenReturn(listOf(testMovie.copy(isFavorite = true)))
+
+        // When
+        val result = repository.refreshPopularMovies()
+
+        // Then
+        assertTrue(result.isSuccess)
+        verify(cacheDataSource).saveMoviesTransactional(listOf(testMovie.copy(isFavorite = true)))
     }
 
     @Test
@@ -177,6 +218,7 @@ class MovieRepositoryImplTest {
     fun `refreshMovieDetails should fetch remote movie and save it to cache`() = runTest {
         // Given
         whenever(apiService.getMovieDetails(1)).thenReturn(testMovieDetailDto)
+        whenever(cacheDataSource.getMovieById(1)).thenReturn(null)
 
         // When
         val result = repository.refreshMovieDetails(1)
@@ -184,6 +226,20 @@ class MovieRepositoryImplTest {
         // Then
         assertTrue(result.isSuccess)
         verify(cacheDataSource).saveMovie(testMovie)
+    }
+
+    @Test
+    fun `refreshMovieDetails should preserve favorite status from cache`() = runTest {
+        // Given
+        whenever(apiService.getMovieDetails(1)).thenReturn(testMovieDetailDto)
+        whenever(cacheDataSource.getMovieById(1)).thenReturn(testMovie.copy(isFavorite = true))
+
+        // When
+        val result = repository.refreshMovieDetails(1)
+
+        // Then
+        assertTrue(result.isSuccess)
+        verify(cacheDataSource).saveMovie(testMovie.copy(isFavorite = true))
     }
 
     @Test

@@ -5,8 +5,11 @@
     <string name="retry">Retry</string>
     <string name="empty_movies">No movies found</string>
     <string name="details_title">Movie Details</string>
-    <string name="details_loading">Loading details...</string>
+    <string name="details_loading">Loading favorites…</string>
     <string name="details_poster_placeholder">Poster</string>
     <string name="details_release_date">%1$s</string>
     <string name="details_rating">%1$.1f</string>
+    <string name="favorites_title">Favorites</string>
+    <string name="favorites_loading">Loading favorites…</string>
+    <string name="favorites_empty">No favorite movies yet</string>
 </resources>

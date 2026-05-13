@@ -4,10 +4,12 @@ import androidx.lifecycle.SavedStateHandle
 import com.mctryn.moviedb.domain.model.Movie
 import com.mctryn.moviedb.domain.repository.MovieRepository
 import com.mctryn.moviedb.domain.usecase.GetPopularMoviesUseCase
+import com.mctryn.moviedb.domain.usecase.ObserveFavoritesUseCase
 import com.mctryn.moviedb.domain.usecase.ToggleFavoriteUseCase
 import com.mctryn.moviedb.navigation.NavigationManager
 import com.mctryn.moviedb.navigation.TestNavigationManager
 import com.mctryn.moviedb.presentation.details.MovieDetailsViewModel
+import com.mctryn.moviedb.presentation.favorites.FavoritesViewModel
 import com.mctryn.moviedb.presentation.list.MovieListViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -41,11 +43,21 @@ val testModule = module {
     single<MovieRepository> { MockRepository() }
     single<NavigationManager> { TestNavigationManager() }
     factory<GetPopularMoviesUseCase> { GetPopularMoviesUseCase(get()) }
+    factory<ObserveFavoritesUseCase> { ObserveFavoritesUseCase(get()) }
     factory<ToggleFavoriteUseCase> { ToggleFavoriteUseCase(get()) }
 
     viewModel {
         MovieListViewModel(
             getPopularMoviesUseCase = get(),
+            toggleFavoriteUseCase = get(),
+            navigationManager = get(),
+            dispatcher = get()
+        )
+    }
+
+    viewModel {
+        FavoritesViewModel(
+            observeFavoritesUseCase = get(),
             toggleFavoriteUseCase = get(),
             navigationManager = get(),
             dispatcher = get()
