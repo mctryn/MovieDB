@@ -61,26 +61,30 @@ class MovieRepositoryImpl(
 
     override fun getMovieDetails(movieId: Int): Flow<RepositoryState<Movie>> = flow {
         emit(RepositoryState.Loading)
-        
-        val cached = cacheDataSource.getMovieById(movieId)
-        
-        if (cached == null) {
-            val result = movieDataSource.getMovieDetails(movieId)
-            result.fold(
-                onSuccess = { movie ->
-                    cacheDataSource.saveMovie(movie)
-                    // Emit the saved movie (non-null)
-                    emit(RepositoryState.Success(movie))
-                },
-                onFailure = { error ->
-                    emit(RepositoryState.Error(error.message ?: "Failed to fetch movie details"))
-                }
-            )
-        } else {
-            // Emit cached movie directly
-            emit(RepositoryState.Success(cached))
+        cacheDataSource.getMovieByIdFlow(movieId).collect { movie ->
+            if (movie != null) {
+                emit(RepositoryState.Success(movie))
+            }
         }
     }.flowOn(Dispatchers.IO)
+
+    override suspend fun refreshMovieDetails(movieId: Int): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                movieDataSource.getMovieDetails(movieId).fold(
+                    onSuccess = { movie ->
+                        cacheDataSource.saveMovie(movie)
+                        Result.success(Unit)
+                    },
+                    onFailure = { error ->
+                        Result.failure(error)
+                    }
+                )
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
 
     // ===== Favorites =====
 

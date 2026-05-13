@@ -14,6 +14,8 @@ class MockRepository : MovieRepository {
     )
 
     private val movieDetailsFlows = mutableMapOf<Int, MutableSharedFlow<RepositoryState<Movie>>>()
+    private var refreshMovieDetailsResult: Result<Unit> = Result.success(Unit)
+    private val refreshMovieDetailsCalls = mutableListOf<Int>()
 
     // getFavorites() - uses SharedFlow for multiple emissions
     private val favoritesFlow = MutableSharedFlow<RepositoryState<List<Movie>>>(
@@ -100,6 +102,11 @@ class MockRepository : MovieRepository {
         }
     }
 
+    override suspend fun refreshMovieDetails(movieId: Int): Result<Unit> {
+        refreshMovieDetailsCalls.add(movieId)
+        return refreshMovieDetailsResult
+    }
+
     /**
      * Emit Loading state for a specific movie's details.
      */
@@ -127,6 +134,20 @@ class MockRepository : MovieRepository {
                 replay = 1,
                 extraBufferCapacity = 1
             )
+        }
+    }
+
+    fun assertRefreshMovieDetailsCalled(movieId: Int) {
+        if (movieId !in refreshMovieDetailsCalls) {
+            throw AssertionError("refreshMovieDetails($movieId) was not called. Calls: $refreshMovieDetailsCalls")
+        }
+    }
+
+    fun setRefreshMovieDetailsResult(success: Boolean, errorMessage: String = "Refresh details failed") {
+        refreshMovieDetailsResult = if (success) {
+            Result.success(Unit)
+        } else {
+            Result.failure(Exception(errorMessage))
         }
     }
 

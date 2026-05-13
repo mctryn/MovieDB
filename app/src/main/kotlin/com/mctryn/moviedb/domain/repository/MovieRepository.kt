@@ -21,10 +21,15 @@ interface MovieRepository {
     suspend fun refreshPopularMovies(): Result<Unit>
     
     /**
-     * Get movie details with state.
-     * Emits Loading → Success(Error) states.
+     * Observe movie details with state.
+     * Emits Loading and then reactive Success/Error updates.
      */
     fun getMovieDetails(movieId: Int): Flow<RepositoryState<Movie>>
+
+    /**
+     * Refresh movie details from data source and update local cache.
+     */
+    suspend fun refreshMovieDetails(movieId: Int): Result<Unit>
     
     /**
      * Get favorites with state.

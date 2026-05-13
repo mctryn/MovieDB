@@ -4,4 +4,9 @@
     <string name="loading_movies">Loading movies…</string>
     <string name="retry">Retry</string>
     <string name="empty_movies">No movies found</string>
+    <string name="details_title">Movie Details</string>
+    <string name="details_loading">Loading details...</string>
+    <string name="details_poster_placeholder">Poster</string>
+    <string name="details_release_date">%1$s</string>
+    <string name="details_rating">%1$.1f</string>
 </resources>

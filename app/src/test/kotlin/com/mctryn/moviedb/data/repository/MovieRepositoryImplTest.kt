@@ -11,6 +11,7 @@ import com.mctryn.moviedb.domain.model.RepositoryState
 import com.mctryn.moviedb.domain.repository.MovieRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import org.mockito.kotlin.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -147,43 +148,54 @@ class MovieRepositoryImplTest {
     // ===== Test: getMovieDetails =====
 
     @Test
-    fun `getMovieDetails should emit Loading then Success with movie from API`() = runTest {
+    fun `getMovieDetails should emit Loading then Success from cache flow`() = runTest {
+        // Given
+        whenever(cacheDataSource.getMovieByIdFlow(1)).thenReturn(flowOf(testMovie))
+
+        // When
+        val result = repository.getMovieDetails(1).first { it is RepositoryState.Success }
+
+        // Then
+        assertTrue(result is RepositoryState.Success)
+        assertEquals("Test Movie", (result as RepositoryState.Success).data.title)
+    }
+
+    @Test
+    fun `getMovieDetails should skip null cache values until movie is available`() = runTest {
+        // Given
+        whenever(cacheDataSource.getMovieByIdFlow(1)).thenReturn(flowOf(null, testMovie))
+
+        // When
+        val result = repository.getMovieDetails(1).first { it is RepositoryState.Success }
+
+        // Then
+        assertTrue(result is RepositoryState.Success)
+        assertEquals("Test Movie", (result as RepositoryState.Success).data.title)
+    }
+
+    @Test
+    fun `refreshMovieDetails should fetch remote movie and save it to cache`() = runTest {
         // Given
         whenever(apiService.getMovieDetails(1)).thenReturn(testMovieDetailDto)
-        whenever(cacheDataSource.getMovieById(1)).thenReturn(null)
 
         // When
-        val result = repository.getMovieDetails(1).first { it is RepositoryState.Success }
+        val result = repository.refreshMovieDetails(1)
 
         // Then
-        assertTrue(result is RepositoryState.Success)
-        assertEquals("Test Movie", (result as RepositoryState.Success).data.title)
+        assertTrue(result.isSuccess)
+        verify(cacheDataSource).saveMovie(testMovie)
     }
 
     @Test
-    fun `getMovieDetails should use cached movie when available`() = runTest {
+    fun `refreshMovieDetails should return failure when remote fetch fails`() = runTest {
         // Given
-        whenever(cacheDataSource.getMovieById(1)).thenReturn(testMovie)
-
-        // When
-        val result = repository.getMovieDetails(1).first { it is RepositoryState.Success }
-
-        // Then
-        assertTrue(result is RepositoryState.Success)
-        assertEquals("Test Movie", (result as RepositoryState.Success).data.title)
-    }
-
-    @Test
-    fun `getMovieDetails should emit Error when movie not found`() = runTest {
-        // Given
-        whenever(cacheDataSource.getMovieById(999)).thenReturn(null)
         whenever(apiService.getMovieDetails(999)).thenThrow(RuntimeException("Not found"))
 
         // When
-        val result = repository.getMovieDetails(999).first { it is RepositoryState.Error }
+        val result = repository.refreshMovieDetails(999)
 
         // Then
-        assertTrue(result is RepositoryState.Error)
+        assertTrue(result.isFailure)
     }
 
     // ===== Test: getFavorites =====

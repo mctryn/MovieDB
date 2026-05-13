@@ -7,10 +7,11 @@ import com.mctryn.moviedb.domain.usecase.GetPopularMoviesUseCase
 import com.mctryn.moviedb.domain.usecase.ToggleFavoriteUseCase
 import com.mctryn.moviedb.navigation.NavigationManager
 import com.mctryn.moviedb.navigation.TestNavigationManager
+import com.mctryn.moviedb.presentation.details.MovieDetailsViewModel
 import com.mctryn.moviedb.presentation.list.MovieListViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -36,7 +37,7 @@ import org.koin.dsl.module
  * ```
  */
 val testModule = module {
-    single<CoroutineDispatcher> { StandardTestDispatcher() }
+    single<CoroutineDispatcher> { Dispatchers.Main.immediate }
     single<MovieRepository> { MockRepository() }
     single<NavigationManager> { TestNavigationManager() }
     factory<GetPopularMoviesUseCase> { GetPopularMoviesUseCase(get()) }
@@ -46,7 +47,16 @@ val testModule = module {
         MovieListViewModel(
             getPopularMoviesUseCase = get(),
             toggleFavoriteUseCase = get(),
+            navigationManager = get(),
+            dispatcher = get()
+        )
+    }
+
+    viewModel { (movieId: Int) ->
+        MovieDetailsViewModel(
+            movieId = movieId,
             savedStateHandle = SavedStateHandle(),
+            repository = get(),
             navigationManager = get(),
             dispatcher = get()
         )
