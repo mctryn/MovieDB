@@ -22,29 +22,21 @@ import org.koin.dsl.module
  * CacheDataSource handles all database operations.
  */
 val repositoryModule = module {
-    // ResourceProvider - provides access to local resources
     single<ResourceProvider> { ResourceProviderImpl(androidContext()) }
     
-    // CacheDataSource - handles ALL database operations
-    // Used by Repository for caching and favorites
     single { CacheDataSource(get()) }
     
-    // MovieDataSource - chosen based on API key availability
-    // Repository only knows this interface (dependency inversion)
     single<MovieDataSource> {
         val apiKey: String? = getOrNull()
         
         if (!apiKey.isNullOrBlank()) {
-            // Has API key - use remote data source
             RemoteDataSource(apiService = get())
         } else {
-            // No API key - use local JSON data source
             LocalJsonDataSource(resourceProvider = get())
         }
     }
     
-    // MovieRepository - uses DataSource for fetching, CacheDataSource for DB
-    single<MovieRepository> { 
+    single<MovieRepository> {
         MovieRepositoryImpl(
             movieDataSource = get(),
             cacheDataSource = get()

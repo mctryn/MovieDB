@@ -170,7 +170,7 @@ class MovieDetailsIntegrationTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun detailsRecreate_restoresMovieIdFromSavedStateHandle() = runTest {
+    fun detailsRecreate_keepsMovieIdFromScreenArgument() = runTest {
         composeTestRule.setContent {
             MovieDetailsScreen(movieId = 1)
         }

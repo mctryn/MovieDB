@@ -9,6 +9,7 @@ import com.mctryn.moviedb.presentation.common.EmptyPane
 import com.mctryn.moviedb.presentation.common.ErrorPane
 import com.mctryn.moviedb.presentation.common.LoadingPane
 import com.mctryn.moviedb.presentation.common.MovieListContent
+import kotlinx.collections.immutable.ImmutableList
 
 @Stable
 sealed interface FavoritesUiState {
@@ -48,7 +49,7 @@ sealed interface FavoritesUiState {
 
     @Stable
     data class Content(
-        val movies: List<MovieItemUiModel>,
+        val movies: ImmutableList<MovieItemUiModel>,
         val onMovieClick: (Int) -> Unit,
         val onFavoriteClick: (Int) -> Unit,
     ) : FavoritesUiState {

@@ -8,8 +8,8 @@ import com.mctryn.moviedb.domain.usecase.RefreshFavoritesUseCase
 import com.mctryn.moviedb.domain.usecase.RefreshMovieDetailsUseCase
 import com.mctryn.moviedb.domain.usecase.RefreshPopularMoviesUseCase
 import com.mctryn.moviedb.domain.usecase.ToggleFavoriteUseCase
+import com.mctryn.moviedb.navigation.BackStackNavigationManager
 import com.mctryn.moviedb.navigation.NavigationManager
-import com.mctryn.moviedb.navigation.TestNavigationManager
 import com.mctryn.moviedb.presentation.details.MovieDetailsViewModel
 import com.mctryn.moviedb.presentation.favorites.FavoritesViewModel
 import com.mctryn.moviedb.presentation.list.MovieListViewModel
@@ -19,38 +19,38 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 /**
- * Test Koin Module for UI Testing.
+ * Test Koin module for full navigation integration tests.
+ * Uses the real BackStackNavigationManager so MovieDbApp mutates the actual NavDisplay back stack.
  */
-val testModule = module {
+val navigationTestModule = module {
     single<CoroutineDispatcher> { Dispatchers.Main.immediate }
     single<MovieRepository> { MockRepository() }
-    single<NavigationManager> { TestNavigationManager() }
-
+    single<NavigationManager> { BackStackNavigationManager() }
     factory<GetPopularMoviesUseCase> { GetPopularMoviesUseCase(get()) }
-    factory<RefreshPopularMoviesUseCase> { RefreshPopularMoviesUseCase(get()) }
     factory<GetMovieDetailsUseCase> { GetMovieDetailsUseCase(get()) }
-    factory<RefreshMovieDetailsUseCase> { RefreshMovieDetailsUseCase(get()) }
     factory<ObserveFavoritesUseCase> { ObserveFavoritesUseCase(get()) }
-    factory<RefreshFavoritesUseCase> { RefreshFavoritesUseCase(get()) }
     factory<ToggleFavoriteUseCase> { ToggleFavoriteUseCase(get()) }
+    factory<RefreshPopularMoviesUseCase> { RefreshPopularMoviesUseCase(get()) }
+    factory<RefreshFavoritesUseCase> { RefreshFavoritesUseCase(get()) }
+    factory<RefreshMovieDetailsUseCase> { RefreshMovieDetailsUseCase(get()) }
 
     viewModel {
         MovieListViewModel(
             getPopularMoviesUseCase = get(),
-            refreshPopularMoviesUseCase = get(),
             toggleFavoriteUseCase = get(),
             navigationManager = get(),
-            dispatcher = get()
+            dispatcher = get(),
+            refreshPopularMoviesUseCase = get()
         )
     }
 
     viewModel {
         FavoritesViewModel(
             observeFavoritesUseCase = get(),
-            refreshFavoritesUseCase = get(),
             toggleFavoriteUseCase = get(),
             navigationManager = get(),
-            dispatcher = get()
+            dispatcher = get(),
+            refreshFavoritesUseCase = get()
         )
     }
 

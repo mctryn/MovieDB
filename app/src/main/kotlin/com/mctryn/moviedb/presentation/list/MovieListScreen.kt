@@ -8,35 +8,22 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.mctryn.moviedb.R
+import com.mctryn.moviedb.presentation.common.BottomNavState.MovieListSelected
+import com.mctryn.moviedb.presentation.common.MovieDbTopAppBar
 import org.koin.compose.viewmodel.koinViewModel
 
-/**
- * Movie List Screen.
- * 
- * Displays a list of popular movies with support for:
- * - Loading state
- * - Error state with retry
- * - Content state with movie list
- * - Pull-to-refresh
- * - Favorite toggle
- * 
- * Navigation to details is handled via [NavigationManager] injected into ViewModel.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieListScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navigateToFavoriteList: () -> Unit
 ) {
     val viewModel = koinViewModel<MovieListViewModel>()
     val uiState by viewModel.uiState.collectAsState()
@@ -44,8 +31,8 @@ fun MovieListScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.movie_list_title)) },
+            MovieDbTopAppBar(
+                title = stringResource(R.string.movie_list_title),
                 actions = {
                     IconButton(onClick = { viewModel.refresh() }) {
                         Icon(
@@ -53,12 +40,10 @@ fun MovieListScreen(
                             contentDescription = "Refresh movies"
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                }
             )
+        }, bottomBar = {
+            MovieListSelected.Show(navigateToFavoriteList)
         }
     ) { paddingValues ->
         Box(

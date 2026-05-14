@@ -269,11 +269,12 @@ class FavoritesIntegrationTest {
         page.verifyMovieTitle("Titanic")
         page.verifyMovieTitle("Inception")
     }
-}
 
-@Composable
-private fun FavoritesScreenStub() {
-    FavoritesScreen()
+    @Composable
+    private fun FavoritesScreenStub() {
+        val navigationManager: NavigationManager = koinTestRule.koin.get()
+        FavoritesScreen(navigateToMoviesList = { navigationManager.navigateToMovieList() })
+    }
 }
 
 private val testFavoriteMovies = listOf(

@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -13,7 +14,8 @@ class FavoritesPageObject(
     private val provider: SemanticsNodeInteractionsProvider
 ) {
     fun verifyTitle(title: String) {
-        provider.onNodeWithText(title).assertIsDisplayed()
+        provider.onAllNodesWithText(title, useUnmergedTree = true)
+            .assertCountEquals(2)
     }
 
     fun verifyLoading() {

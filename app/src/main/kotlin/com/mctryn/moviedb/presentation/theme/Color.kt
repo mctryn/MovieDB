@@ -1,4 +1,4 @@
-package com.mctryn.moviedb.ui.theme
+package com.mctryn.moviedb.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

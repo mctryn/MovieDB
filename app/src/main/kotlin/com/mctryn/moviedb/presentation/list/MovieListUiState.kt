@@ -8,6 +8,7 @@ import com.mctryn.moviedb.presentation.common.MovieItemUiModel
 import com.mctryn.moviedb.presentation.common.ErrorPane
 import com.mctryn.moviedb.presentation.common.LoadingPane
 import com.mctryn.moviedb.presentation.common.MovieListContent
+import kotlinx.collections.immutable.ImmutableList
 
 /**
  * Sealed interface representing UI states for Movie List screen.
@@ -59,7 +60,7 @@ sealed interface MovieListUiState {
      */
     @Stable
     data class Content(
-        val movies: List<MovieItemUiModel>,
+        val movies: ImmutableList<MovieItemUiModel>,
         val onMovieClick: (Int) -> Unit,
         val onFavoriteClick: (Int) -> Unit,
     ) : MovieListUiState {

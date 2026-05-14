@@ -1,4 +1,4 @@
-package com.mctryn.moviedb.presentation.list
+package com.mctryn.moviedb.presentation.common
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -13,10 +13,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -40,6 +42,7 @@ import androidx.compose.ui.unit.dp
  * movie.isFavorite.toFavoriteState().Show(onClick = { ... })
  * ```
  */
+@Immutable
 sealed interface FavoriteIconState {
 
     /**
@@ -91,7 +94,7 @@ sealed interface FavoriteIconState {
 private fun FavoriteIconAnimation(
     targetScale: Float,
     targetTint: Color,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier

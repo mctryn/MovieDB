@@ -4,7 +4,6 @@ import com.mctryn.moviedb.data.remote.api.MovieApiService
 import com.mctryn.moviedb.data.remote.dto.MovieDetailDto
 import com.mctryn.moviedb.data.remote.dto.MovieDto
 import com.mctryn.moviedb.data.remote.dto.MovieListResponse
-import com.mctryn.moviedb.domain.model.Movie
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -83,36 +82,6 @@ class RemoteDataSourceTest {
         assertTrue(result.isFailure)
     }
 
-    @Test
-    fun `searchMovies should return movies from API`() = runTest {
-        // Given
-        val response = MovieListResponse(
-            page = 1,
-            results = listOf(testMovieDto),
-            totalPages = 1,
-            totalResults = 1
-        )
-        whenever(apiService.searchMovies(query = "Test", page = 1)).thenReturn(response)
-
-        // When
-        val result = remoteDataSource.searchMovies("Test", 1)
-
-        // Then
-        assertTrue(result.isSuccess)
-        assertEquals(1, result.getOrNull()?.size)
-    }
-
-    @Test
-    fun `searchMovies should return failure on API error`() = runTest {
-        // Given
-        whenever(apiService.searchMovies(query = "Test", page = 1)).thenThrow(RuntimeException("API Error"))
-
-        // When
-        val result = remoteDataSource.searchMovies("Test", 1)
-
-        // Then
-        assertTrue(result.isFailure)
-    }
 
     @Test
     fun `getMovieDetails should return movie from API`() = runTest {
@@ -139,8 +108,4 @@ class RemoteDataSourceTest {
         assertTrue(result.isFailure)
     }
 
-    @Test
-    fun `isAvailable should return true`() = runTest {
-        assertTrue(remoteDataSource.isAvailable())
-    }
 }

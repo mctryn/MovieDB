@@ -39,51 +39,6 @@ fun MovieDetailDto.toDomain(isFavorite: Boolean = false): Movie {
     )
 }
 
-// ===== DTO to Entity =====
-
-fun MovieDto.toEntity(): MovieEntity {
-    return MovieEntity(
-        id = id,
-        title = title,
-        overview = overview,
-        posterPath = posterPath,
-        releaseDate = releaseDate ?: "",
-        voteAverage = voteAverage,
-        voteCount = voteCount,
-        isFavorite = false
-    )
-}
-
-fun MovieDetailDto.toEntity(): MovieEntity {
-    return MovieEntity(
-        id = id,
-        title = title,
-        overview = overview,
-        posterPath = posterPath,
-        releaseDate = releaseDate ?: "",
-        voteAverage = voteAverage,
-        voteCount = voteCount,
-        isFavorite = false
-    )
-}
-
-// ===== Entity to Domain =====
-
-fun MovieEntity.toDomain(): Movie {
-    return Movie(
-        id = id,
-        title = title,
-        overview = overview,
-        posterPath = posterPath,
-        releaseDate = releaseDate,
-        voteAverage = voteAverage,
-        voteCount = voteCount,
-        isFavorite = isFavorite
-    )
-}
-
-// ===== Domain to Entity =====
-
 fun Movie.toEntity(): MovieEntity {
     return MovieEntity(
         id = id,
@@ -97,8 +52,5 @@ fun Movie.toEntity(): MovieEntity {
     )
 }
 
-// ===== List extensions =====
-
 fun List<MovieDto>.toDomainList(): List<Movie> = map { it.toDomain() }
-fun List<MovieDto>.toEntityList(): List<MovieEntity> = map { it.toEntity() }
 fun List<MovieEntity>.toDomainEntitiesList(): List<Movie> = map { it.toDomain() }

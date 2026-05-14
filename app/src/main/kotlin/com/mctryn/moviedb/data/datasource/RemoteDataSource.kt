@@ -17,20 +17,9 @@ class RemoteDataSource(
     private val apiService: MovieApiService
 ) : MovieDataSource {
 
-    override fun isAvailable(): Boolean = true
-
     override suspend fun getPopularMovies(page: Int): Result<List<Movie>> {
         return try {
             val response = apiService.getPopularMovies(page = page)
-            Result.success(response.results.toDomainList())
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun searchMovies(query: String, page: Int): Result<List<Movie>> {
-        return try {
-            val response = apiService.searchMovies(query = query, page = page)
             Result.success(response.results.toDomainList())
         } catch (e: Exception) {
             Result.failure(e)

@@ -11,8 +11,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.whenever
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 /**
  * Unit tests for GetMovieDetailsUseCase.
@@ -43,15 +43,12 @@ class GetMovieDetailsUseCaseTest {
 
     @Test
     fun `invoke should return Loading then Success state with movie`() = runTest {
-        // Given
         whenever(repository.getMovieDetails(550)).thenReturn(
             flowOf(RepositoryState.Loading, RepositoryState.Success(testMovie))
         )
 
-        // When
         val result = useCase(550).first { it is RepositoryState.Success }
 
-        // Then
         assert(result is RepositoryState.Success)
         assert((result as RepositoryState.Success).data.title == "Fight Club")
         verify(repository).getMovieDetails(550)
@@ -59,16 +56,13 @@ class GetMovieDetailsUseCaseTest {
 
     @Test
     fun `invoke should emit Error state when movie not found`() = runTest {
-        // Given
         val errorMessage = "Movie not found"
         whenever(repository.getMovieDetails(999)).thenReturn(
             flowOf(RepositoryState.Loading, RepositoryState.Error(errorMessage))
         )
 
-        // When
         val result = useCase(999).first { it is RepositoryState.Error }
 
-        // Then
         assert(result is RepositoryState.Error)
         assert((result as RepositoryState.Error).message == errorMessage)
         verify(repository).getMovieDetails(999)
@@ -76,15 +70,12 @@ class GetMovieDetailsUseCaseTest {
 
     @Test
     fun `invoke should pass movieId to repository`() = runTest {
-        // Given
         whenever(repository.getMovieDetails(123)).thenReturn(
             flowOf(RepositoryState.Loading, RepositoryState.Error("Not found"))
         )
 
-        // When
         useCase(123).first()
 
-        // Then
         verify(repository).getMovieDetails(123)
     }
 }

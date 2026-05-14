@@ -34,22 +34,4 @@ data class MovieEntity(
             isFavorite = isFavorite
         )
     }
-
-    companion object {
-        /**
-         * Create entity from domain model.
-         */
-        fun fromDomain(movie: Movie): MovieEntity {
-            return MovieEntity(
-                id = movie.id,
-                title = movie.title,
-                overview = movie.overview,
-                posterPath = movie.posterPath,
-                releaseDate = movie.releaseDate,
-                voteAverage = movie.voteAverage,
-                voteCount = movie.voteCount,
-                isFavorite = movie.isFavorite
-            )
-        }
-    }
 }

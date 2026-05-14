@@ -1,7 +1,6 @@
 package com.mctryn.moviedb.data.datasource
 
 import com.mctryn.moviedb.data.local.database.MovieDao
-import com.mctryn.moviedb.data.mapper.toDomain
 import com.mctryn.moviedb.data.mapper.toDomainEntitiesList
 import com.mctryn.moviedb.data.mapper.toEntity
 import com.mctryn.moviedb.domain.model.Movie

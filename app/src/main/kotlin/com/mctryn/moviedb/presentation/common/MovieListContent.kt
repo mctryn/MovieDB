@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mctryn.moviedb.R
-import com.mctryn.moviedb.presentation.list.FavoriteIconState
+import kotlinx.collections.immutable.*
 
 
 /**
@@ -19,7 +19,7 @@ import com.mctryn.moviedb.presentation.list.FavoriteIconState
 @Composable
 fun MovieListContent(
     modifier: Modifier = Modifier,
-    movies: List<MovieItemUiModel>,
+    movies: ImmutableList<MovieItemUiModel>,
     onMovieClick: (Int) -> Unit,
     onFavoriteClick: (Int) -> Unit,
 ) {

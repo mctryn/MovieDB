@@ -24,7 +24,7 @@ import com.mctryn.moviedb.domain.model.Movie
 sealed interface MovieDetailsUiState {
 
     @Composable
-    fun show(
+    fun Show(
         modifier: Modifier = Modifier,
         onRetry: () -> Unit = {},
         onToggleFavorite: () -> Unit = {}
@@ -32,7 +32,7 @@ sealed interface MovieDetailsUiState {
 
     data object Loading : MovieDetailsUiState {
         @Composable
-        override fun show(
+        override fun Show(
             modifier: Modifier,
             onRetry: () -> Unit,
             onToggleFavorite: () -> Unit
@@ -43,14 +43,17 @@ sealed interface MovieDetailsUiState {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(text = stringResource(R.string.details_loading))
+                Text(
+                    text = stringResource(R.string.details_loading),
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
     }
 
     data class Error(val message: String) : MovieDetailsUiState {
         @Composable
-        override fun show(
+        override fun Show(
             modifier: Modifier,
             onRetry: () -> Unit,
             onToggleFavorite: () -> Unit
@@ -61,9 +64,15 @@ sealed interface MovieDetailsUiState {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(text = message)
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyLarge
+                )
                 Button(onClick = onRetry, modifier = Modifier.padding(top = 12.dp)) {
-                    Text(text = stringResource(R.string.retry))
+                    Text(
+                        text = stringResource(R.string.retry),
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
         }
@@ -71,7 +80,7 @@ sealed interface MovieDetailsUiState {
 
     data class Content(val movie: Movie) : MovieDetailsUiState {
         @Composable
-        override fun show(
+        override fun Show(
             modifier: Modifier,
             onRetry: () -> Unit,
             onToggleFavorite: () -> Unit

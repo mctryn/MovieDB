@@ -3,7 +3,6 @@ package com.mctryn.moviedb.domain.usecase
 import com.mctryn.moviedb.domain.model.Movie
 import com.mctryn.moviedb.domain.model.RepositoryState
 import com.mctryn.moviedb.domain.repository.MovieRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -12,8 +11,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.whenever
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 /**
  * Unit tests for GetPopularMoviesUseCase.
@@ -42,15 +41,12 @@ class GetPopularMoviesUseCaseTest {
 
     @Test
     fun `invoke should return Loading then Success state with movies`() = runTest {
-        // Given
         whenever(repository.getPopularMovies()).thenReturn(
             flowOf(RepositoryState.Loading, RepositoryState.Success(testMovies))
         )
 
-        // When
         val result = useCase().first { it is RepositoryState.Success }
 
-        // Then
         assert(result is RepositoryState.Success)
         assert((result as RepositoryState.Success).data.size == 2)
         verify(repository).getPopularMovies()
@@ -58,45 +54,15 @@ class GetPopularMoviesUseCaseTest {
 
     @Test
     fun `invoke should emit Error state when repository fails`() = runTest {
-        // Given
         val errorMessage = "Network error"
         whenever(repository.getPopularMovies()).thenReturn(
             flowOf(RepositoryState.Loading, RepositoryState.Error(errorMessage))
         )
 
-        // When
         val result = useCase().first { it is RepositoryState.Error }
 
-        // Then
         assert(result is RepositoryState.Error)
         assert((result as RepositoryState.Error).message == errorMessage)
         verify(repository).getPopularMovies()
-    }
-
-    @Test
-    fun `refresh should delegate to repository refresh`() = runTest {
-        // Given
-        whenever(repository.refreshPopularMovies()).thenReturn(Result.success(Unit))
-
-        // When
-        val result = useCase.refresh()
-
-        // Then
-        assert(result.isSuccess)
-        verify(repository).refreshPopularMovies()
-    }
-
-    @Test
-    fun `refresh should return failure when repository fails`() = runTest {
-        // Given
-        val exception = Exception("Refresh failed")
-        whenever(repository.refreshPopularMovies()).thenReturn(Result.failure(exception))
-
-        // When
-        val result = useCase.refresh()
-
-        // Then
-        assert(result.isFailure)
-        assert(result.exceptionOrNull()?.message == "Refresh failed")
     }
 }

@@ -1,6 +1,7 @@
 package com.mctryn.moviedb.presentation.list
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import com.mctryn.moviedb.di.MockRepository
 import com.mctryn.moviedb.di.testModule
@@ -55,7 +56,7 @@ class MovieListIntegrationTest {
     @Test
     fun userStory_browseRefreshRecoverAndOpenDetails() = runTest {
         composeTestRule.setContent {
-            MovieListScreen()
+            MovieListScreenStub()
         }
 
         page.verifyLoading()
@@ -99,7 +100,7 @@ class MovieListIntegrationTest {
     @Test
     fun userStory_favoriteLifecycle_fromAddToRemove_persistedByFlow() = runTest {
         composeTestRule.setContent {
-            MovieListScreen()
+            MovieListScreenStub()
         }
 
         testRepository.emitPopularMovies(testMovies)
@@ -136,7 +137,7 @@ class MovieListIntegrationTest {
     @Test
     fun userStory_errorFirst_thenRetry_toUsableState() = runTest {
         composeTestRule.setContent {
-            MovieListScreen()
+            MovieListScreenStub()
         }
 
         page.verifyLoading()
@@ -170,7 +171,7 @@ class MovieListIntegrationTest {
     @Test
     fun userStory_multiAction_session_stays_consistent() = runTest {
         composeTestRule.setContent {
-            MovieListScreen()
+            MovieListScreenStub()
         }
 
         testRepository.emitPopularMovies(testMovies)
@@ -213,7 +214,7 @@ class MovieListIntegrationTest {
     @Test
     fun statePreservation_afterRecreate_keepsContentAndFavoriteState() = runTest {
         composeTestRule.setContent {
-            MovieListScreen()
+            MovieListScreenStub()
         }
 
         testRepository.emitPopularMovies(testMovies)
@@ -233,7 +234,7 @@ class MovieListIntegrationTest {
 
         composeTestRule.activityRule.scenario.recreate()
         composeTestRule.setContent {
-            MovieListScreen()
+            MovieListScreenStub()
         }
         composeTestRule.waitForIdle()
 
@@ -247,13 +248,19 @@ class MovieListIntegrationTest {
     @Test
     fun emptyList_showsEmptyMessage() = runTest {
         composeTestRule.setContent {
-            MovieListScreen()
+            MovieListScreenStub()
         }
 
         testRepository.emitPopularMovies(emptyList())
         composeTestRule.waitForIdle()
 
         page.verifyEmptyState()
+    }
+
+    @Composable
+    private fun MovieListScreenStub() {
+        val navigationManager: NavigationManager = koinTestRule.koin.get()
+        MovieListScreen(navigateToFavoriteList = { navigationManager.navigateToFavorites() })
     }
 }
 

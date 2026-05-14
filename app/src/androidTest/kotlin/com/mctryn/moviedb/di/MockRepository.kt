@@ -95,7 +95,7 @@ class MockRepository : MovieRepository {
 
     override fun getMovieDetails(movieId: Int): Flow<RepositoryState<Movie>> {
         return movieDetailsFlows.getOrPut(movieId) {
-            MutableSharedFlow<RepositoryState<Movie>>(
+            MutableSharedFlow(
                 replay = 1,
                 extraBufferCapacity = 1
             )
@@ -130,7 +130,7 @@ class MockRepository : MovieRepository {
 
     private fun getOrCreateDetailsFlow(movieId: Int): MutableSharedFlow<RepositoryState<Movie>> {
         return movieDetailsFlows.getOrPut(movieId) {
-            MutableSharedFlow<RepositoryState<Movie>>(
+            MutableSharedFlow(
                 replay = 1,
                 extraBufferCapacity = 1
             )

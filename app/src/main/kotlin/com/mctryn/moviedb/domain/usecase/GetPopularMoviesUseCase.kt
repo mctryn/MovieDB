@@ -17,11 +17,4 @@ class GetPopularMoviesUseCase(
     operator fun invoke(): Flow<RepositoryState<List<Movie>>> {
         return repository.getPopularMovies()
     }
-
-    /**
-     * Refresh popular movies from API.
-     */
-    suspend fun refresh(): Result<Unit> {
-        return repository.refreshPopularMovies()
-    }
 }

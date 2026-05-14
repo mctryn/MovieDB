@@ -18,8 +18,9 @@ val viewModelModule = module {
     viewModel { (movieId: Int) ->
         MovieDetailsViewModel(
             movieId = movieId,
-            savedStateHandle = get(),
-            repository = get(),
+            toggleFavoriteUseCase = get(),
+            getMovieDetailsUseCase = get(),
+            refreshMovieDetailsUseCase = get(),
             navigationManager = get(),
             dispatcher = get()
         )

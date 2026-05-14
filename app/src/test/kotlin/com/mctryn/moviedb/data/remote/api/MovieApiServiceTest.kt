@@ -1,7 +1,5 @@
 package com.mctryn.moviedb.data.remote.api
 
-import com.mctryn.moviedb.data.remote.api.MovieApiService
-import com.mctryn.moviedb.domain.model.Movie
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse

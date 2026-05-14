@@ -50,7 +50,10 @@ fun ErrorPane(
         if (onRetry != null) {
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onRetry) {
-                Text(stringResource(R.string.retry))
+                Text(
+                    text = stringResource(R.string.retry),
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
         }
     }

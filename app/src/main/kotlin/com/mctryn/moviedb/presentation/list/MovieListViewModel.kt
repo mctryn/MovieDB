@@ -6,9 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.mctryn.moviedb.domain.model.Movie
 import com.mctryn.moviedb.domain.model.RepositoryState
 import com.mctryn.moviedb.domain.usecase.GetPopularMoviesUseCase
+import com.mctryn.moviedb.domain.usecase.RefreshPopularMoviesUseCase
 import com.mctryn.moviedb.domain.usecase.ToggleFavoriteUseCase
 import com.mctryn.moviedb.navigation.NavigationManager
 import com.mctryn.moviedb.presentation.common.toUiModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -37,6 +39,7 @@ interface IMovieListViewModel {
  */
 class MovieListViewModel(
     private val getPopularMoviesUseCase: GetPopularMoviesUseCase,
+    private val refreshPopularMoviesUseCase: RefreshPopularMoviesUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val navigationManager: NavigationManager,
     private val dispatcher: CoroutineDispatcher
@@ -62,7 +65,7 @@ class MovieListViewModel(
     override fun refresh() {
         viewModelScope.launch {
             withContext(dispatcher) {
-                getPopularMoviesUseCase.refresh()
+                refreshPopularMoviesUseCase()
             }
         }
     }
@@ -94,7 +97,7 @@ private fun Flow<RepositoryState<List<Movie>>>.toUiState(
 
         is RepositoryState.Success -> {
             MovieListUiState.Content(
-                movies = repoState.data.map { it.toUiModel() },
+                movies = repoState.data.map { it.toUiModel() }.toImmutableList(),
                 onMovieClick = { movieId -> navigationManager.navigateToMovieDetails(movieId) },
                 onFavoriteClick = onFavoriteClick,
             )

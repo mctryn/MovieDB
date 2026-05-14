@@ -6,9 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.mctryn.moviedb.domain.model.Movie
 import com.mctryn.moviedb.domain.model.RepositoryState
 import com.mctryn.moviedb.domain.usecase.ObserveFavoritesUseCase
+import com.mctryn.moviedb.domain.usecase.RefreshFavoritesUseCase
 import com.mctryn.moviedb.domain.usecase.ToggleFavoriteUseCase
 import com.mctryn.moviedb.navigation.NavigationManager
 import com.mctryn.moviedb.presentation.common.toUiModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,11 +25,12 @@ interface IFavoritesViewModel {
     val uiState: StateFlow<FavoritesUiState>
     fun onMovieClick(movieId: Int)
     fun onFavoriteClick(movieId: Int)
-    fun retry()
+    fun refresh()
 }
 
 class FavoritesViewModel(
     private val observeFavoritesUseCase: ObserveFavoritesUseCase,
+    private val refreshFavoritesUseCase: RefreshFavoritesUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val navigationManager: NavigationManager,
     private val dispatcher: CoroutineDispatcher
@@ -43,7 +46,7 @@ class FavoritesViewModel(
         .toUiState(
             navigationManager = navigationManager,
             onFavoriteClick = onFavoriteClickCallback,
-            retry = { retry() }
+            refresh = { refresh() }
         )
         .stateIn(
             scope = viewModelScope,
@@ -59,10 +62,10 @@ class FavoritesViewModel(
         onFavoriteClickCallback(movieId)
     }
 
-    override fun retry() {
+    override fun refresh() {
         viewModelScope.launch {
             withContext(dispatcher) {
-                observeFavoritesUseCase()
+                refreshFavoritesUseCase()
             }
         }
     }
@@ -71,13 +74,13 @@ class FavoritesViewModel(
 private fun Flow<RepositoryState<List<Movie>>>.toUiState(
     navigationManager: NavigationManager,
     onFavoriteClick: (Int) -> Unit,
-    retry: () -> Unit
+    refresh: () -> Unit
 ): Flow<FavoritesUiState> = map { repoState ->
     when (repoState) {
         is RepositoryState.Loading -> FavoritesUiState.Loading
         is RepositoryState.Error -> FavoritesUiState.Error(
             message = repoState.message,
-            onRetry = retry
+            onRetry = refresh
         )
 
         is RepositoryState.Success -> {
@@ -85,7 +88,7 @@ private fun Flow<RepositoryState<List<Movie>>>.toUiState(
                 FavoritesUiState.Empty
             } else {
                 FavoritesUiState.Content(
-                    movies = repoState.data.map { it.toUiModel() },
+                    movies = repoState.data.map { it.toUiModel() }.toImmutableList(),
                     onMovieClick = { movieId -> navigationManager.navigateToMovieDetails(movieId) },
                     onFavoriteClick = onFavoriteClick,
                 )

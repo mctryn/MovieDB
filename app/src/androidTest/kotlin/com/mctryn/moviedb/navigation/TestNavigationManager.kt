@@ -1,5 +1,7 @@
 package com.mctryn.moviedb.navigation
 
+import androidx.navigation3.runtime.NavKey
+
 /**
  * Test Implementation of [NavigationManager] for UI integration tests.
  * 
@@ -29,15 +31,26 @@ class TestNavigationManager : NavigationManager {
 
     private val _navigatedToMovieIds = mutableListOf<Int>()
     val navigatedToMovieIds: List<Int> = _navigatedToMovieIds
-    
+
+    private val _topLevelNavigations = mutableListOf<NavKey>()
+    val topLevelNavigations: List<NavKey> = _topLevelNavigations
+
     private val _navigatedBack = mutableListOf<Unit>()
     val navigatedBack: List<Unit> = _navigatedBack
-    
+
     private var _canNavigateBack = false
     val canNavigateBack: Boolean get() = _canNavigateBack
 
     override fun navigateToMovieDetails(movieId: Int) {
         _navigatedToMovieIds.add(movieId)
+    }
+
+    override fun navigateToMovieList() {
+        _topLevelNavigations.add(MovieListNav)
+    }
+
+    override fun navigateToFavorites() {
+        _topLevelNavigations.add(FavoritesNav)
     }
 
     override fun navigateBack() {
@@ -52,6 +65,7 @@ class TestNavigationManager : NavigationManager {
      */
     fun reset() {
         _navigatedToMovieIds.clear()
+        _topLevelNavigations.clear()
         _navigatedBack.clear()
         _canNavigateBack = false
     }
@@ -78,11 +92,23 @@ class TestNavigationManager : NavigationManager {
     }
 
     /**
-     * Assert that navigation to movie details was NOT called.
+     * Assert that no navigation was called.
      */
     fun assertNoNavigation() {
-        check(_navigatedToMovieIds.isEmpty()) {
-            "Expected no navigation, but got ${_navigatedToMovieIds.size} navigation(s): $_navigatedToMovieIds"
+        check(_navigatedToMovieIds.isEmpty() && _topLevelNavigations.isEmpty()) {
+            "Expected no navigation, but got movieDetails=$_navigatedToMovieIds topLevel=$_topLevelNavigations"
+        }
+    }
+
+    fun assertNavigatedToMovieList() {
+        check(_topLevelNavigations.lastOrNull() == MovieListNav) {
+            "Expected last top-level navigation to MovieListNav, but was ${_topLevelNavigations.lastOrNull()}"
+        }
+    }
+
+    fun assertNavigatedToFavorites() {
+        check(_topLevelNavigations.lastOrNull() == FavoritesNav) {
+            "Expected last top-level navigation to FavoritesNav, but was ${_topLevelNavigations.lastOrNull()}"
         }
     }
 
