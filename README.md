@@ -186,12 +186,6 @@ The app includes **comprehensive testing** for:
 
 ---
 
-## 📝 Architecture Overview
-
-For a detailed breakdown of the app's architecture, see **[ARCHITECTURE.md](ARCHITECTURE.md)**.
-
----
-
 ## 🤝 Contributing
 
 Contributions are welcome! Here’s how you can help:
